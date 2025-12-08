@@ -134,11 +134,7 @@ export class ApiClient {
     return this.request<T>('GET', url);
   }
 
-  private async post<T>(
-    path: string,
-    operationType: string,
-    data: Record<string, unknown> | object,
-  ): Promise<T> {
+  private async post<T>(path: string, operationType: string, data: Record<string, unknown> | object): Promise<T> {
     if (!this.signer) {
       throw new Error('Private key required for POST requests');
     }
