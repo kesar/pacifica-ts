@@ -54,8 +54,8 @@ describe('Signer', () => {
       };
       const result = signer.recursiveSortKeys(input) as Record<string, Record<string, number>>;
       expect(Object.keys(result)).toEqual(['a', 'z']);
-      expect(Object.keys(result['z'])).toEqual(['a', 'c']);
-      expect(Object.keys(result['a'])).toEqual(['x', 'y']);
+      expect(Object.keys(result.z)).toEqual(['a', 'c']);
+      expect(Object.keys(result.a)).toEqual(['x', 'y']);
     });
 
     it('should handle arrays of objects', () => {

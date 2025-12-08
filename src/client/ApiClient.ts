@@ -137,14 +137,13 @@ export class ApiClient {
   private async post<T>(
     path: string,
     operationType: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data: any
+    data: Record<string, unknown>
   ): Promise<T> {
     if (!this.signer) {
       throw new Error('Private key required for POST requests');
     }
 
-    const signedData = this.signer.signRequest(operationType, data as Record<string, unknown>);
+    const signedData = this.signer.signRequest(operationType, data);
     return this.request<T>('POST', path, signedData);
   }
 

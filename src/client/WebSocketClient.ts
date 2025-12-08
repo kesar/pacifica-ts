@@ -130,7 +130,7 @@ export class WebSocketClient extends EventEmitter<WebSocketEventMap> {
         try {
           const data = JSON.parse(event.data.toString()) as PacificaWebSocketEvent;
           this.handleMessage(data);
-        } catch (error) {
+        } catch (_error) {
           this.emit('error', new WebSocketError('Failed to parse WebSocket message'));
         }
       };
@@ -404,8 +404,12 @@ export class WebSocketClient extends EventEmitter<WebSocketEventMap> {
       throw new WebSocketError('WebSocket is not connected');
     }
 
+    if (!this.ws) {
+      throw new WebSocketError('WebSocket instance is null');
+    }
+
     try {
-      this.ws!.send(JSON.stringify(message));
+      this.ws.send(JSON.stringify(message));
     } catch (error) {
       throw new WebSocketError(`Failed to send message: ${error}`);
     }
@@ -472,7 +476,9 @@ export class WebSocketClient extends EventEmitter<WebSocketEventMap> {
       if (this.isConnected()) {
         try {
           this.sendMessage({ method: 'ping' });
-        } catch (error) {}
+        } catch (_error) {
+          // Ignore ping errors - connection will be handled by onclose/onerror handlers
+        }
       }
     }, PING_INTERVAL);
   }
@@ -512,7 +518,9 @@ export class WebSocketClient extends EventEmitter<WebSocketEventMap> {
       try {
         const params = JSON.parse(subscriptionKey) as SubscriptionParams;
         this.sendMessage({ method: 'subscribe', params });
-      } catch (error) {}
+      } catch (_error) {
+        // Ignore resubscription errors - individual subscription failures shouldn't stop others
+      }
     }
   }
 }
