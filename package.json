@@ -74,7 +74,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/kesar/pacifica-ts.git"
+    "url": "git+https://github.com/kesar/pacifica-ts.git"
   },
   "bugs": {
     "url": "https://github.com/kesar/pacifica-ts/issues"
