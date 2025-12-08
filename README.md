@@ -7,6 +7,7 @@
 
 A comprehensive TypeScript library for interacting with the Pacifica API and WebSocket services. Built with type safety, robust error handling, and automatic reconnection management.
 
+
 ## Features
 
 - **Full TypeScript support** with comprehensive type definitions

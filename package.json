@@ -1,6 +1,6 @@
 {
   "name": "pacifica.js",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "TypeScript SDK for Pacifica API and WebSocket integration",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -36,7 +36,10 @@
     "format:write": "biome format --write src",
     "check": "biome check src",
     "check:fix": "biome check --write src",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "release": "npm run build && changeset publish"
   },
   "keywords": [
     "pacifica",
@@ -59,6 +62,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.8",
+    "@changesets/cli": "^2.29.8",
     "@types/node": "^22.10.2",
     "@types/ws": "^8.5.13",
     "tsup": "^8.3.5",
