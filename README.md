@@ -1,6 +1,6 @@
 # pacifica.js
 
-[![CI](https://github.com/pacifica/typescript-sdk/actions/workflows/ci.yml/badge.svg)](https://github.com/pacifica/typescript-sdk/actions/workflows/ci.yml)
+[![CI](https://github.com/kesar/pacifica-ts/actions/workflows/ci.yml/badge.svg)](https://github.com/kesar/pacifica-ts/actions/workflows/ci.yml)
 [![npm version](https://badge.fury.io/js/pacifica.js.svg)](https://www.npmjs.com/package/pacifica.js)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/node/v/pacifica.js)](https://nodejs.org/)
@@ -427,8 +427,8 @@ Check the `/examples` directory for complete usage examples:
 
 ```bash
 # Clone the repository
-git clone https://github.com/pacifica/typescript-sdk.git
-cd typescript-sdk
+git clone https://github.com/kesar/pacifica-ts.git
+cd pacifica-ts
 
 # Install dependencies
 npm install
@@ -553,4 +553,4 @@ MIT
 - [Pacifica Python SDK](https://github.com/pacifica-fi/python-sdk)
 - [Discord API Channel](https://discord.com/channels/1325864651816435822/1378723526957334548)
 - [Contributing Guidelines](CONTRIBUTING.md)
-- [GitHub Issues](https://github.com/pacifica/typescript-sdk/issues)
+- [GitHub Issues](https://github.com/kesar/pacifica-ts/issues)

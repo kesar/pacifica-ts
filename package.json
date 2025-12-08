@@ -74,12 +74,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/pacifica/typescript-sdk.git"
+    "url": "https://github.com/kesar/pacifica-ts.git"
   },
   "bugs": {
-    "url": "https://github.com/pacifica/typescript-sdk/issues"
+    "url": "https://github.com/kesar/pacifica-ts/issues"
   },
-  "homepage": "https://github.com/pacifica/typescript-sdk#readme",
+  "homepage": "https://github.com/kesar/pacifica-ts#readme",
   "publishConfig": {
     "access": "public"
   }

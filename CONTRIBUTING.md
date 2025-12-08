@@ -32,14 +32,14 @@ We are committed to providing a welcoming and inclusive experience for everyone.
 2. Clone your fork locally:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/typescript-sdk.git
-cd typescript-sdk
+git clone https://github.com/YOUR_USERNAME/pacifica-ts.git
+cd pacifica-ts
 ```
 
 3. Add the upstream repository:
 
 ```bash
-git remote add upstream https://github.com/pacifica/typescript-sdk.git
+git remote add upstream https://github.com/kesar/pacifica-ts.git
 ```
 
 ## Development Setup
