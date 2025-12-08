@@ -94,9 +94,7 @@ export class Signer {
    * Verify a signature (useful for testing)
    */
   verify(message: string, signatureBase58: string, publicKeyBase58?: string): boolean {
-    const publicKey = publicKeyBase58
-      ? bs58.decode(publicKeyBase58)
-      : this.keypair.publicKey;
+    const publicKey = publicKeyBase58 ? bs58.decode(publicKeyBase58) : this.keypair.publicKey;
 
     const messageBytes = Buffer.from(message, 'utf-8');
     const signatureBytes = bs58.decode(signatureBase58);
