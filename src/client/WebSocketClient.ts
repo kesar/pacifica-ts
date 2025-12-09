@@ -558,60 +558,75 @@ export class WebSocketClient extends EventEmitter<WebSocketEventMap> {
    * Transforms abbreviated position data from WebSocket to readable field names.
    */
   private transformPositions(data: unknown[]): import('../types/common.js').Position[] {
-    return (data as Array<Record<string, unknown>>).map((pos) => ({
-      symbol: pos['s'] as string,
-      side: pos['d'] as 'bid' | 'ask',
-      amount: pos['a'] as string,
-      entry_price: pos['p'] as string,
-      margin: pos['m'] !== undefined && pos['m'] !== null ? (pos['m'] as string) : undefined,
-      funding: pos['f'] as string,
-      isolated: pos['i'] as boolean,
-      created_at: pos['t'] as number, // WebSocket only provides timestamp, use for both
-      updated_at: pos['t'] as number,
-    }));
+    return (data as Array<Record<string, unknown>>).map((pos) => {
+      const position: import('../types/common.js').Position = {
+        symbol: pos['s'] as string,
+        side: pos['d'] as 'bid' | 'ask',
+        amount: pos['a'] as string,
+        entry_price: pos['p'] as string,
+        funding: pos['f'] as string,
+        isolated: pos['i'] as boolean,
+        created_at: pos['t'] as number,
+        updated_at: pos['t'] as number,
+      };
+      if (pos['m'] !== undefined && pos['m'] !== null) {
+        position.margin = pos['m'] as string;
+      }
+      return position;
+    });
   }
 
   /**
    * Transforms abbreviated order data from WebSocket to readable field names.
    */
   private transformOrders(data: unknown[]): import('../types/common.js').Order[] {
-    return (data as Array<Record<string, unknown>>).map((order) => ({
-      order_id: order['i'] as number,
-      client_order_id: order['I'] !== undefined && order['I'] !== null ? (order['I'] as string) : undefined,
-      symbol: order['s'] as string,
-      side: order['d'] as 'bid' | 'ask',
-      price: (order['p'] || order['ip']) as string, // Use average filled price or initial price
-      initial_amount: order['a'] as string,
-      filled_amount: order['f'] as string,
-      cancelled_amount: order['c'] as string,
-      stop_price: order['sp'] !== undefined && order['sp'] !== null ? (order['sp'] as string) : null,
-      order_type: order['ot'] as string,
-      stop_parent_order_id: null, // Not provided in WebSocket response
-      reduce_only: order['ro'] as boolean,
-      created_at: order['t'] as number, // WebSocket only provides timestamp
-      updated_at: order['t'] as number,
-    }));
+    return (data as Array<Record<string, unknown>>).map((order) => {
+      const transformedOrder: import('../types/common.js').Order = {
+        order_id: order['i'] as number,
+        symbol: order['s'] as string,
+        side: order['d'] as 'bid' | 'ask',
+        price: (order['p'] || order['ip']) as string,
+        initial_amount: order['a'] as string,
+        filled_amount: order['f'] as string,
+        cancelled_amount: order['c'] as string,
+        stop_price: order['sp'] !== undefined && order['sp'] !== null ? (order['sp'] as string) : null,
+        order_type: order['ot'] as string,
+        stop_parent_order_id: null,
+        reduce_only: order['ro'] as boolean,
+        created_at: order['t'] as number,
+        updated_at: order['t'] as number,
+      };
+      if (order['I'] !== undefined && order['I'] !== null) {
+        transformedOrder.client_order_id = order['I'] as string;
+      }
+      return transformedOrder;
+    });
   }
 
   /**
    * Transforms abbreviated trade data from WebSocket to readable field names.
    */
   private transformTrades(data: unknown[]): import('../types/common.js').Trade[] {
-    return (data as Array<Record<string, unknown>>).map((trade) => ({
-      history_id: trade['h'] as number,
-      order_id: trade['i'] as number,
-      client_order_id: trade['I'] !== undefined && trade['I'] !== null ? (trade['I'] as string) : undefined,
-      symbol: trade['s'] as string,
-      amount: trade['a'] as string,
-      price: trade['p'] as string,
-      entry_price: trade['o'] as string,
-      fee: trade['f'] as string,
-      pnl: trade['n'] as string,
-      event_type: trade['te'] as string,
-      side: trade['ts'] as string,
-      created_at: trade['t'] as number,
-      cause: trade['tc'] as string,
-    }));
+    return (data as Array<Record<string, unknown>>).map((trade) => {
+      const transformedTrade: import('../types/common.js').Trade = {
+        history_id: trade['h'] as number,
+        order_id: trade['i'] as number,
+        symbol: trade['s'] as string,
+        amount: trade['a'] as string,
+        price: trade['p'] as string,
+        entry_price: trade['o'] as string,
+        fee: trade['f'] as string,
+        pnl: trade['n'] as string,
+        event_type: trade['te'] as string,
+        side: trade['ts'] as string,
+        created_at: trade['t'] as number,
+        cause: trade['tc'] as string,
+      };
+      if (trade['I'] !== undefined && trade['I'] !== null) {
+        transformedTrade.client_order_id = trade['I'] as string;
+      }
+      return transformedTrade;
+    });
   }
 
   /**
@@ -650,15 +665,14 @@ export class WebSocketClient extends EventEmitter<WebSocketEventMap> {
    * Transforms a single order update object from WebSocket to readable field names.
    */
   private transformOrderUpdateOrder(orderData: Record<string, unknown>): import('../types/common.js').Order {
-    return {
+    const order: import('../types/common.js').Order = {
       order_id: orderData['i'] as number,
-      client_order_id: orderData['I'] !== undefined && orderData['I'] !== null ? (orderData['I'] as string) : undefined,
       symbol: orderData['s'] as string,
       side: orderData['d'] as 'bid' | 'ask',
       price: (orderData['p'] || orderData['ip']) as string,
       initial_amount: orderData['a'] as string,
       filled_amount: orderData['f'] as string,
-      cancelled_amount: '0', // Not provided in order updates
+      cancelled_amount: '0',
       stop_price: orderData['sp'] !== undefined && orderData['sp'] !== null ? (orderData['sp'] as string) : null,
       order_type: orderData['ot'] as string,
       stop_parent_order_id: orderData['si'] !== undefined && orderData['si'] !== null ? (Number(orderData['si']) as number) : null,
@@ -666,6 +680,10 @@ export class WebSocketClient extends EventEmitter<WebSocketEventMap> {
       created_at: orderData['ct'] as number,
       updated_at: orderData['ut'] as number,
     };
+    if (orderData['I'] !== undefined && orderData['I'] !== null) {
+      order.client_order_id = orderData['I'] as string;
+    }
+    return order;
   }
 
   private startPingInterval(): void {
