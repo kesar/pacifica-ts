@@ -95,7 +95,7 @@ Timestamp in Milliseconds
 
 `"volume_24h"`
 
-boolean
+decimal string
 
 Volume (USD) of this market in the past 24 hours
 

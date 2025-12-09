@@ -478,13 +478,13 @@ export class WebSocketClient extends EventEmitter<WebSocketEventMap> {
         this.emit('bbo', data as ExtractEventData<'bbo'>);
         break;
       case 'trades':
-        this.emit('trades', data as ExtractEventData<'trades'>);
+        this.emit('trades', this.transformTrades(data as unknown[]));
         break;
       case 'candle':
-        this.emit('candle', data as ExtractEventData<'candle'>);
+        this.emit('candle', this.transformCandle(data as Record<string, unknown>));
         break;
       case 'mark_price_candle':
-        this.emit('mark_price_candle', data as ExtractEventData<'mark_price_candle'>);
+        this.emit('mark_price_candle', this.transformCandle(data as Record<string, unknown>));
         break;
       case 'account_margin':
         this.emit('account_margin', data as ExtractEventData<'account_margin'>);
@@ -493,19 +493,19 @@ export class WebSocketClient extends EventEmitter<WebSocketEventMap> {
         this.emit('account_leverage', data as ExtractEventData<'account_leverage'>);
         break;
       case 'account_info':
-        this.emit('account_info', data as ExtractEventData<'account_info'>);
+        this.emit('account_info', this.transformAccountInfo(data as Record<string, unknown>));
         break;
       case 'account_positions':
-        this.emit('account_positions', data as ExtractEventData<'account_positions'>);
+        this.emit('account_positions', this.transformPositions(data as unknown[]));
         break;
       case 'account_orders':
-        this.emit('account_orders', data as ExtractEventData<'account_orders'>);
+        this.emit('account_orders', this.transformOrders(data as unknown[]));
         break;
       case 'account_order_updates':
-        this.emit('account_order_updates', data as ExtractEventData<'account_order_updates'>);
+        this.emit('account_order_updates', this.transformOrderUpdates(data as unknown[]));
         break;
       case 'account_trades':
-        this.emit('account_trades', data as ExtractEventData<'account_trades'>);
+        this.emit('account_trades', this.transformTrades(data as unknown[]));
         break;
       case 'error':
         this.emit('ws_error', data as ExtractEventData<'ws_error'>);
@@ -513,6 +513,159 @@ export class WebSocketClient extends EventEmitter<WebSocketEventMap> {
       default:
         break;
     }
+  }
+
+  /**
+   * Transforms abbreviated candle data from WebSocket to readable field names.
+   */
+  private transformCandle(data: Record<string, unknown>): import('../types/common.js').Candle {
+    return {
+      timestamp: data['t'] as number,
+      end_time: data['T'] as number,
+      symbol: data['s'] as string,
+      interval: data['i'] as string,
+      open: data['o'] as string,
+      close: data['c'] as string,
+      high: data['h'] as string,
+      low: data['l'] as string,
+      volume: data['v'] as string,
+      number_of_trades: data['n'] as number,
+    };
+  }
+
+  /**
+   * Transforms abbreviated account info data from WebSocket to readable field names.
+   */
+  private transformAccountInfo(data: Record<string, unknown>): import('../types/common.js').AccountInfo {
+    return {
+      balance: data['b'] as string,
+      fee_level: data['f'] as number,
+      account_equity: data['ae'] as string,
+      available_to_spend: data['as'] as string,
+      available_to_withdraw: data['aw'] as string,
+      pending_balance: data['pb'] as string,
+      total_margin_used: data['mu'] as string,
+      cross_mmr: data['cm'] as string,
+      positions_count: data['pc'] as number,
+      orders_count: data['oc'] as number,
+      stop_orders_count: data['sc'] as number,
+      updated_at: data['t'] as number,
+      use_ltp_for_stop_orders: false, // Not provided in WebSocket response
+    };
+  }
+
+  /**
+   * Transforms abbreviated position data from WebSocket to readable field names.
+   */
+  private transformPositions(data: unknown[]): import('../types/common.js').Position[] {
+    return (data as Array<Record<string, unknown>>).map((pos) => ({
+      symbol: pos['s'] as string,
+      side: pos['d'] as 'bid' | 'ask',
+      amount: pos['a'] as string,
+      entry_price: pos['p'] as string,
+      margin: pos['m'] !== undefined && pos['m'] !== null ? (pos['m'] as string) : undefined,
+      funding: pos['f'] as string,
+      isolated: pos['i'] as boolean,
+      created_at: pos['t'] as number, // WebSocket only provides timestamp, use for both
+      updated_at: pos['t'] as number,
+    }));
+  }
+
+  /**
+   * Transforms abbreviated order data from WebSocket to readable field names.
+   */
+  private transformOrders(data: unknown[]): import('../types/common.js').Order[] {
+    return (data as Array<Record<string, unknown>>).map((order) => ({
+      order_id: order['i'] as number,
+      client_order_id: order['I'] !== undefined && order['I'] !== null ? (order['I'] as string) : undefined,
+      symbol: order['s'] as string,
+      side: order['d'] as 'bid' | 'ask',
+      price: (order['p'] || order['ip']) as string, // Use average filled price or initial price
+      initial_amount: order['a'] as string,
+      filled_amount: order['f'] as string,
+      cancelled_amount: order['c'] as string,
+      stop_price: order['sp'] !== undefined && order['sp'] !== null ? (order['sp'] as string) : null,
+      order_type: order['ot'] as string,
+      stop_parent_order_id: null, // Not provided in WebSocket response
+      reduce_only: order['ro'] as boolean,
+      created_at: order['t'] as number, // WebSocket only provides timestamp
+      updated_at: order['t'] as number,
+    }));
+  }
+
+  /**
+   * Transforms abbreviated trade data from WebSocket to readable field names.
+   */
+  private transformTrades(data: unknown[]): import('../types/common.js').Trade[] {
+    return (data as Array<Record<string, unknown>>).map((trade) => ({
+      history_id: trade['h'] as number,
+      order_id: trade['i'] as number,
+      client_order_id: trade['I'] !== undefined && trade['I'] !== null ? (trade['I'] as string) : undefined,
+      symbol: trade['s'] as string,
+      amount: trade['a'] as string,
+      price: trade['p'] as string,
+      entry_price: trade['o'] as string,
+      fee: trade['f'] as string,
+      pnl: trade['n'] as string,
+      event_type: trade['te'] as string,
+      side: trade['ts'] as string,
+      created_at: trade['t'] as number,
+      cause: trade['tc'] as string,
+    }));
+  }
+
+  /**
+   * Transforms abbreviated order update data from WebSocket to readable field names.
+   * The WebSocket sends an array of order objects, and we derive update_type from order event (oe) and status (os).
+   */
+  private transformOrderUpdates(data: unknown[]): Array<{
+    order: import('../types/common.js').Order;
+    update_type: 'created' | 'filled' | 'partially_filled' | 'cancelled' | 'expired';
+  }> {
+    return (data as Array<Record<string, unknown>>).map((orderData) => {
+      const order = this.transformOrderUpdateOrder(orderData);
+      // Map order event (oe) and status (os) to update_type
+      const orderEvent = orderData['oe'] as string;
+      const orderStatus = orderData['os'] as string;
+      let update_type: 'created' | 'filled' | 'partially_filled' | 'cancelled' | 'expired';
+      
+      if (orderStatus === 'filled') {
+        update_type = 'filled';
+      } else if (orderStatus === 'partially_filled') {
+        update_type = 'partially_filled';
+      } else if (orderEvent === 'cancel' || orderEvent === 'force_cancel' || orderStatus === 'cancelled') {
+        update_type = 'cancelled';
+      } else if (orderEvent === 'expired' || orderStatus === 'rejected') {
+        update_type = 'expired';
+      } else {
+        // Default to created for new orders (make, stop_created, etc.)
+        update_type = 'created';
+      }
+
+      return { order, update_type };
+    });
+  }
+
+  /**
+   * Transforms a single order update object from WebSocket to readable field names.
+   */
+  private transformOrderUpdateOrder(orderData: Record<string, unknown>): import('../types/common.js').Order {
+    return {
+      order_id: orderData['i'] as number,
+      client_order_id: orderData['I'] !== undefined && orderData['I'] !== null ? (orderData['I'] as string) : undefined,
+      symbol: orderData['s'] as string,
+      side: orderData['d'] as 'bid' | 'ask',
+      price: (orderData['p'] || orderData['ip']) as string,
+      initial_amount: orderData['a'] as string,
+      filled_amount: orderData['f'] as string,
+      cancelled_amount: '0', // Not provided in order updates
+      stop_price: orderData['sp'] !== undefined && orderData['sp'] !== null ? (orderData['sp'] as string) : null,
+      order_type: orderData['ot'] as string,
+      stop_parent_order_id: orderData['si'] !== undefined && orderData['si'] !== null ? (Number(orderData['si']) as number) : null,
+      reduce_only: orderData['r'] as boolean,
+      created_at: orderData['ct'] as number,
+      updated_at: orderData['ut'] as number,
+    };
   }
 
   private startPingInterval(): void {

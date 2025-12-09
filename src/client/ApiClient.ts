@@ -206,33 +206,54 @@ export class ApiClient {
   }
 
   async getCandleData(params: GetCandleDataParams): Promise<Candle[]> {
-    return this.get<Candle[]>('/kline', {
+    const data = await this.get<Array<Record<string, unknown>>>('/kline', {
       symbol: params.symbol,
       interval: params.interval,
       start_time: params.start_time,
       ...(params.end_time && { end_time: params.end_time }),
       ...(params.limit && { limit: params.limit }),
     });
+    return data.map((candle) => this.transformCandle(candle));
   }
 
   async getKlineCandleData(params: GetCandleDataParams): Promise<Candle[]> {
-    return this.get<Candle[]>('/kline', {
+    const data = await this.get<Array<Record<string, unknown>>>('/kline', {
       symbol: params.symbol,
       interval: params.interval,
       start_time: params.start_time,
       ...(params.end_time && { end_time: params.end_time }),
       ...(params.limit && { limit: params.limit }),
     });
+    return data.map((candle) => this.transformCandle(candle));
   }
 
   async getMarkPriceCandleData(params: GetCandleDataParams): Promise<Candle[]> {
-    return this.get<Candle[]>('/kline/mark', {
+    const data = await this.get<Array<Record<string, unknown>>>('/kline/mark', {
       symbol: params.symbol,
       interval: params.interval,
       start_time: params.start_time,
       ...(params.end_time && { end_time: params.end_time }),
       ...(params.limit && { limit: params.limit }),
     });
+    return data.map((candle) => this.transformCandle(candle));
+  }
+
+  /**
+   * Transforms abbreviated candle data from API to readable field names.
+   */
+  private transformCandle(data: Record<string, unknown>): Candle {
+    return {
+      timestamp: data['t'] as number,
+      end_time: data['T'] as number,
+      symbol: data['s'] as string,
+      interval: data['i'] as string,
+      open: data['o'] as string,
+      close: data['c'] as string,
+      high: data['h'] as string,
+      low: data['l'] as string,
+      volume: data['v'] as string,
+      number_of_trades: data['n'] as number,
+    };
   }
 
   async getHistoricalFunding(

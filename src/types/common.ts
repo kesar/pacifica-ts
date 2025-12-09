@@ -22,16 +22,12 @@ export interface StopOrderConfig {
 export interface Position {
   symbol: string;
   side: OrderSide;
-  size: string;
+  amount: string;
   entry_price: string;
-  mark_price: string;
-  liquidation_price: string;
-  unrealized_pnl: string;
-  margin_mode: MarginMode;
-  leverage: number;
-  margin_used: string;
-  maintenance_margin: string;
-  position_id: number;
+  margin?: string; // Only shown for isolated margin
+  funding: string;
+  isolated: boolean;
+  created_at: number;
   updated_at: number;
 }
 
@@ -41,25 +37,31 @@ export interface Order {
   symbol: string;
   side: OrderSide;
   price: string;
-  amount: string;
-  filled: string;
-  status: OrderStatus;
-  tif: TimeInForce;
+  initial_amount: string;
+  filled_amount: string;
+  cancelled_amount: string;
+  stop_price: string | null;
+  order_type: string; // "limit" | "market" | "stop_limit" | "stop_market" | "take_profit_limit" | "stop_loss_limit" | "take_profit_market" | "stop_loss_market"
+  stop_parent_order_id: number | null;
   reduce_only: boolean;
   created_at: number;
   updated_at: number;
 }
 
 export interface Trade {
-  trade_id: number;
+  history_id: number;
   order_id: number;
+  client_order_id?: string;
   symbol: string;
-  side: OrderSide;
-  price: string;
   amount: string;
+  price: string;
+  entry_price: string;
   fee: string;
-  realized_pnl: string;
-  timestamp: number;
+  pnl: string;
+  event_type: string; // "fulfill_taker" | "fulfill_maker"
+  side: string; // "open_long" | "open_short" | "close_long" | "close_short"
+  created_at: number;
+  cause: string; // "normal" | "market_liquidation" | "backstop_liquidation" | "settlement"
 }
 
 export interface MarketInfo {
@@ -103,12 +105,16 @@ export interface Orderbook {
 }
 
 export interface Candle {
-  timestamp: number;
+  timestamp: number; // Start time
+  end_time: number; // End time
+  symbol: string;
+  interval: string;
   open: string;
+  close: string;
   high: string;
   low: string;
-  close: string;
   volume: string;
+  number_of_trades: number;
 }
 
 export interface AccountInfo {

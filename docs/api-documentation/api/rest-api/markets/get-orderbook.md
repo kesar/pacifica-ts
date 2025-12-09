@@ -117,7 +117,7 @@ Two-dimensional array containing bids (index 0) and asks (index 1). Each index c
 
 `'t'`
 
-string
+integer
 
 Response timestamp in milliseconds
 

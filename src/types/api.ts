@@ -172,6 +172,6 @@ export interface BatchOrderResponse {
   results: Array<{
     success: boolean;
     order_id?: number;
-    error?: string;
+    error: string | null;
   }>;
 }

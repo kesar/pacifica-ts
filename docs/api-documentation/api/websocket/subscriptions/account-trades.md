@@ -103,7 +103,7 @@ Trade amount
 
 `'u'`
 
-sting
+string
 
 Account address
 

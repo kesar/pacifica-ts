@@ -180,7 +180,7 @@ Contains information about placed order
 
 `'cancelled_count'`
 
-string
+integer
 
 Number of orders successfully cancelled
 
