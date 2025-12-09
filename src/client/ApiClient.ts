@@ -206,10 +206,10 @@ export class ApiClient {
   }
 
   async getCandleData(params: GetCandleDataParams): Promise<Candle[]> {
-    return this.get<Candle[]>('/candles', {
+    return this.get<Candle[]>('/kline', {
       symbol: params.symbol,
       interval: params.interval,
-      ...(params.start_time && { start_time: params.start_time }),
+      start_time: params.start_time,
       ...(params.end_time && { end_time: params.end_time }),
       ...(params.limit && { limit: params.limit }),
     });
@@ -219,17 +219,17 @@ export class ApiClient {
     return this.get<Candle[]>('/kline', {
       symbol: params.symbol,
       interval: params.interval,
-      ...(params.start_time && { start_time: params.start_time }),
+      start_time: params.start_time,
       ...(params.end_time && { end_time: params.end_time }),
       ...(params.limit && { limit: params.limit }),
     });
   }
 
   async getMarkPriceCandleData(params: GetCandleDataParams): Promise<Candle[]> {
-    return this.get<Candle[]>('/mark-price-candles', {
+    return this.get<Candle[]>('/kline/mark', {
       symbol: params.symbol,
       interval: params.interval,
-      ...(params.start_time && { start_time: params.start_time }),
+      start_time: params.start_time,
       ...(params.end_time && { end_time: params.end_time }),
       ...(params.limit && { limit: params.limit }),
     });
@@ -370,12 +370,13 @@ export class ApiClient {
    *   symbol: 'ETH',
    *   amount: '1.0',
    *   side: 'bid',
-   *   reduce_only: false
+   *   reduce_only: false,
+   *   slippage_percent: '0.5'
    * });
    * ```
    */
   async createMarketOrder(request: CreateMarketOrderRequest): Promise<CreateOrderResponse> {
-    return this.post<CreateOrderResponse>('/orders/create-market', 'create_market_order', request);
+    return this.post<CreateOrderResponse>('/orders/create_market', 'create_market_order', request);
   }
 
   /**
@@ -390,17 +391,18 @@ export class ApiClient {
    * ```typescript
    * const stopOrder = await client.createStopOrder({
    *   symbol: 'BTC',
-   *   stop_price: '45000',
-   *   limit_price: '44900',
-   *   amount: '0.1',
    *   side: 'ask',
-   *   tif: 'GTC',
-   *   reduce_only: false
+   *   reduce_only: false,
+   *   stop_order: {
+   *     stop_price: '45000',
+   *     limit_price: '44900',
+   *     amount: '0.1'
+   *   }
    * });
    * ```
    */
   async createStopOrder(request: CreateStopOrderRequest): Promise<CreateOrderResponse> {
-    return this.post<CreateOrderResponse>('/orders/create-stop', 'create_stop_order', request);
+    return this.post<CreateOrderResponse>('/orders/stop/create', 'create_stop_order', request);
   }
 
   /**
@@ -444,11 +446,11 @@ export class ApiClient {
   }
 
   async cancelStopOrder(request: CancelStopOrderRequest): Promise<CancelOrderResponse> {
-    return this.post<CancelOrderResponse>('/orders/cancel-stop', 'cancel_stop_order', request);
+    return this.post<CancelOrderResponse>('/orders/stop/cancel', 'cancel_stop_order', request);
   }
 
-  async cancelAllOrders(request: CancelAllOrdersRequest = {}): Promise<{ cancelled_count: number }> {
-    return this.post<{ cancelled_count: number }>('/orders/cancel-all', 'cancel_all_orders', request);
+  async cancelAllOrders(request: CancelAllOrdersRequest): Promise<{ cancelled_count: number }> {
+    return this.post<{ cancelled_count: number }>('/orders/cancel_all', 'cancel_all_orders', request);
   }
 
   async batchOrder(request: BatchOrderRequest): Promise<BatchOrderResponse> {
@@ -456,7 +458,7 @@ export class ApiClient {
   }
 
   async createPositionTPSL(request: CreatePositionTPSLRequest): Promise<{ success: boolean }> {
-    return this.post<{ success: boolean }>('/orders/position-tpsl', 'create_position_tpsl', request);
+    return this.post<{ success: boolean }>('/positions/tpsl', 'set_position_tpsl', request);
   }
 
   async updateLeverage(request: UpdateLeverageRequest): Promise<{ success: boolean }> {
@@ -464,22 +466,51 @@ export class ApiClient {
   }
 
   async updateMarginMode(request: UpdateMarginModeRequest): Promise<{ success: boolean }> {
-    return this.post<{ success: boolean }>('/account/margin-mode', 'update_margin_mode', request);
+    return this.post<{ success: boolean }>('/account/margin', 'update_margin_mode', request);
   }
 
-  async requestWithdrawal(request: WithdrawalRequest): Promise<{ withdrawal_id: string }> {
-    return this.post<{ withdrawal_id: string }>('/account/withdraw', 'request_withdrawal', request);
+  async requestWithdrawal(request: WithdrawalRequest): Promise<{ success: boolean }> {
+    return this.post<{ success: boolean }>('/account/withdraw', 'withdraw', request);
   }
 
   async listSubaccounts(): Promise<Array<{ subaccount_id: number; name: string; created_at: number }>> {
     return this.get<Array<{ subaccount_id: number; name: string; created_at: number }>>('/subaccounts');
   }
 
-  async createSubaccount(request: CreateSubaccountRequest): Promise<{ subaccount_id: number }> {
-    return this.post<{ subaccount_id: number }>('/subaccounts/create', 'create_subaccount', request);
+  async createSubaccount(request: CreateSubaccountRequest): Promise<{ success: boolean }> {
+    // Note: This endpoint requires dual signatures (main_signature and sub_signature)
+    // and does not use the standard signing flow. The request already contains both signatures.
+    const url = `${this.baseUrl}/account/subaccount/create`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify(request),
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+      if (isApiErrorResponse(responseData)) {
+        handleHttpError(response.status, responseData.error, responseData.code);
+      }
+      handleHttpError(response.status, response.statusText);
+    }
+
+    if (!isApiResponse<{ success: boolean }>(responseData)) {
+      throw new Error('Invalid API response format');
+    }
+
+    if (!responseData.success && responseData.error) {
+      handleHttpError(response.status, responseData.error, responseData.code ?? undefined);
+    }
+
+    return responseData.data;
   }
 
-  async subaccountFundTransfer(request: SubaccountFundTransferRequest): Promise<{ success: boolean }> {
-    return this.post<{ success: boolean }>('/subaccounts/transfer', 'subaccount_fund_transfer', request);
+  async subaccountFundTransfer(request: SubaccountFundTransferRequest): Promise<{ success: boolean; error: string | null }> {
+    return this.post<{ success: boolean; error: string | null }>('/account/subaccount/transfer', 'subaccount_transfer', request);
   }
 }

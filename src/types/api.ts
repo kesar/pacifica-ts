@@ -1,4 +1,4 @@
-import type { MarginMode, OrderSide, StopOrderConfig, TimeInForce } from './common.js';
+import type { OrderSide, StopOrderConfig, TimeInForce } from './common.js';
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -38,6 +38,7 @@ export interface CreateMarketOrderRequest {
   amount: string;
   side: OrderSide;
   reduce_only: boolean;
+  slippage_percent: string;
   client_order_id?: string;
   take_profit?: StopOrderConfig;
   stop_loss?: StopOrderConfig;
@@ -45,33 +46,39 @@ export interface CreateMarketOrderRequest {
 
 export interface CreateStopOrderRequest {
   symbol: string;
-  stop_price: string;
-  limit_price?: string;
-  amount: string;
   side: OrderSide;
-  tif: TimeInForce;
   reduce_only: boolean;
-  client_order_id?: string;
+  stop_order: {
+    stop_price: string;
+    limit_price?: string;
+    client_order_id?: string;
+    amount: string;
+  };
 }
 
 export interface EditOrderRequest {
-  order_id: number;
-  price?: string;
-  amount?: string;
+  symbol: string;
+  price: string;
+  amount: string;
+  order_id?: number;
   client_order_id?: string;
 }
 
 export interface CancelOrderRequest {
-  order_id: number;
+  symbol: string;
+  order_id?: number;
   client_order_id?: string;
 }
 
 export interface CancelStopOrderRequest {
-  stop_order_id: number;
+  symbol: string;
+  order_id: number;
   client_order_id?: string;
 }
 
 export interface CancelAllOrdersRequest {
+  all_symbols: boolean;
+  exclude_reduce_only: boolean;
   symbol?: string;
 }
 
@@ -86,6 +93,7 @@ export interface BatchOrderRequest {
 
 export interface CreatePositionTPSLRequest {
   symbol: string;
+  side: OrderSide;
   take_profit?: StopOrderConfig;
   stop_loss?: StopOrderConfig;
 }
@@ -93,27 +101,29 @@ export interface CreatePositionTPSLRequest {
 export interface UpdateLeverageRequest {
   symbol: string;
   leverage: number;
-  margin_mode: MarginMode;
 }
 
 export interface UpdateMarginModeRequest {
   symbol: string;
-  margin_mode: MarginMode;
+  is_isolated: boolean;
 }
 
 export interface WithdrawalRequest {
   amount: string;
-  destination_address: string;
 }
 
 export interface CreateSubaccountRequest {
-  name: string;
+  main_account: string;
+  subaccount: string;
+  main_signature: string;
+  sub_signature: string;
+  timestamp: number;
+  expiry_window?: number;
 }
 
 export interface SubaccountFundTransferRequest {
-  subaccount_id: number;
+  to_account: string;
   amount: string;
-  direction: 'deposit' | 'withdraw';
 }
 
 export interface GetOrderHistoryParams {
@@ -134,8 +144,8 @@ export interface GetTradeHistoryParams {
 
 export interface GetCandleDataParams {
   symbol: string;
-  interval: '1m' | '5m' | '15m' | '30m' | '1h' | '4h' | '1d' | '1w';
-  start_time?: number;
+  interval: '1m' | '3m' | '5m' | '15m' | '30m' | '1h' | '2h' | '4h' | '8h' | '12h' | '1d';
+  start_time: number;
   end_time?: number;
   limit?: number;
 }

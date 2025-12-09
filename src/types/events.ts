@@ -125,12 +125,18 @@ export interface WebSocketErrorEvent
 }
 
 export interface WebSocketTradingOperation {
+  /**
+   * Unique request identifier (UUID). Used to correlate requests with responses.
+   */
+  id: string;
+  /**
+   * Operation type (e.g., 'create_order', 'cancel_order', 'edit_order', etc.)
+   */
   type: string;
+  /**
+   * Operation-specific data (will be signed automatically)
+   */
   data: Record<string, unknown>;
-  signature?: string;
-  account?: string;
-  timestamp?: number;
-  expiry_window?: number;
 }
 
 export type PacificaWebSocketEvent =

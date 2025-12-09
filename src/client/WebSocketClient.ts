@@ -255,7 +255,7 @@ export class WebSocketClient extends EventEmitter<WebSocketEventMap> {
    * Subscribes to candlestick (OHLCV) data for a specific symbol and interval.
    *
    * @param symbol - Trading symbol (e.g., 'BTC', 'ETH')
-   * @param interval - Candle interval ('1m', '5m', '15m', '30m', '1h', '4h', '1d', '1w')
+   * @param interval - Candle interval ('1m', '3m', '5m', '15m', '30m', '1h', '2h', '4h', '8h', '12h', '1d')
    *
    * @example
    * ```typescript
@@ -273,7 +273,7 @@ export class WebSocketClient extends EventEmitter<WebSocketEventMap> {
    * Subscribes to mark price candlestick data for a specific symbol and interval.
    *
    * @param symbol - Trading symbol (e.g., 'BTC', 'ETH')
-   * @param interval - Candle interval ('1m', '5m', '15m', '30m', '1h', '4h', '1d', '1w')
+   * @param interval - Candle interval ('1m', '3m', '5m', '15m', '30m', '1h', '2h', '4h', '8h', '12h', '1d')
    */
   subscribeMarkPriceCandle(symbol: string, interval: string): void {
     this.subscribe({ source: 'mark_price_candle', symbol, interval });
@@ -390,13 +390,59 @@ export class WebSocketClient extends EventEmitter<WebSocketEventMap> {
     this.subscribe({ source: 'account_trades', account });
   }
 
+  /**
+   * Sends a trading operation via WebSocket.
+   *
+   * **Requires authentication** - privateKey must be configured.
+   *
+   * The operation data will be automatically signed and wrapped in the correct WebSocket message format:
+   * ```json
+   * {
+   *   "id": "request-uuid",
+   *   "params": {
+   *     "operation_type": {
+   *       "account": "...",
+   *       "signature": "...",
+   *       "timestamp": 123,
+   *       ...operationData
+   *     }
+   *   }
+   * }
+   * ```
+   *
+   * @param operation - Trading operation with id, type, and data
+   * @throws {Error} If private key is not configured
+   * @throws {WebSocketError} If WebSocket is not connected
+   *
+   * @example
+   * ```typescript
+   * ws.sendTradingOperation({
+   *   id: crypto.randomUUID(),
+   *   type: 'cancel_order',
+   *   data: {
+   *     symbol: 'BTC',
+   *     order_id: 12345
+   *   }
+   * });
+   * ```
+   */
   sendTradingOperation(operation: WebSocketTradingOperation): void {
     if (!this.signer) {
       throw new Error('Private key required for trading operations');
     }
 
-    const signedOperation = this.signer.signRequest(operation.type, operation.data);
-    this.sendMessage(signedOperation);
+    // Sign the operation data
+    const signedData = this.signer.signRequest(operation.type, operation.data);
+
+    // Wrap in WebSocket message format
+    const message = {
+      id: operation.id,
+      params: {
+        [operation.type]: signedData,
+      },
+    };
+
+    this.sendMessage(message);
   }
 
   private sendMessage(message: unknown): void {
