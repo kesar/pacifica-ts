@@ -246,19 +246,11 @@ export class ApiClient {
   }
 
   async getAccountInfo(account: string): Promise<AccountInfo> {
-    const result = await this.get<AccountInfo[]>('/account', { account });
-    if (!result[0]) {
-      throw new Error('Account not found');
-    }
-    return result[0];
+    return this.get<AccountInfo>('/account', { account });
   }
 
   async getAccountSettings(account: string): Promise<{ use_ltp_for_stop_orders: boolean }> {
-    const result = await this.get<Array<{ use_ltp_for_stop_orders: boolean }>>('/account/settings', { account });
-    if (!result[0]) {
-      throw new Error('Account settings not found');
-    }
-    return result[0];
+    return this.get<{ use_ltp_for_stop_orders: boolean }>('/account/settings', { account });
   }
 
   async getPositions(account: string, symbol?: string): Promise<Position[]> {
