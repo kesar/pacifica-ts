@@ -8,13 +8,18 @@ Perform a complete release workflow:
    - Run `git status` to see if there are any uncommitted changes
    - If there are changes, create a descriptive commit with them
 
-2. **Ask the user which version bump to perform**:
-   - Use AskUserQuestion to ask: "Which version bump do you want to perform?"
-   - Options: patch (bug fixes), minor (new features), major (breaking changes)
+2. **Automatically determine version bump type**:
+   - Get the latest git tag to find the last version
+   - Analyze commits since the last tag using Conventional Commits:
+     - **Major**: If any commit contains "BREAKING CHANGE:", "BREAKING:", or type with "!" (e.g., "feat!:")
+     - **Minor**: If any commit starts with "feat:" or "feature:"
+     - **Patch**: For "fix:", "chore:", "docs:", "style:", "refactor:", "perf:", "test:", or other commits
+   - If no commits since last tag, default to patch
+   - Report which version bump was auto-detected and why
 
 3. **Bump the version**:
    - Read current version from package.json
-   - Update package.json with the new version based on user's choice
+   - Update package.json with the new version based on auto-detected type
    - Commit the version bump with message: "chore: bump version to X.X.X"
    - Create a git tag for the new version (e.g., v2.1.0)
 
@@ -31,6 +36,7 @@ Perform a complete release workflow:
    - Report the published version and provide links
 
 At the end, provide a summary showing:
+- Version bump type that was auto-detected
 - Version number published
 - Link to npm package
 - Link to GitHub release
