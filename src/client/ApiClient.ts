@@ -109,7 +109,7 @@ export class ApiClient {
       let responseData: unknown;
       try {
         responseData = JSON.parse(responseText);
-      } catch (parseError) {
+      } catch (_parseError) {
         if (!response.ok) {
           handleHttpError(response.status, `Invalid JSON response: ${responseText.slice(0, 100)}`);
         }
@@ -263,16 +263,16 @@ export class ApiClient {
    */
   private transformCandle(data: Record<string, unknown>): Candle {
     return {
-      timestamp: data['t'] as number,
-      end_time: data['T'] as number,
-      symbol: data['s'] as string,
-      interval: data['i'] as string,
-      open: data['o'] as string,
-      close: data['c'] as string,
-      high: data['h'] as string,
-      low: data['l'] as string,
-      volume: data['v'] as string,
-      number_of_trades: data['n'] as number,
+      timestamp: data.t as number,
+      end_time: data.T as number,
+      symbol: data.s as string,
+      interval: data.i as string,
+      open: data.o as string,
+      close: data.c as string,
+      high: data.h as string,
+      low: data.l as string,
+      volume: data.v as string,
+      number_of_trades: data.n as number,
     };
   }
 
@@ -515,7 +515,11 @@ export class ApiClient {
   }
 
   async listSubaccounts(account: string): Promise<Array<{ subaccount_id: number; name: string; created_at: number }>> {
-    return this.post<Array<{ subaccount_id: number; name: string; created_at: number }>>('/account/subaccount/list', 'list_subaccounts', { account });
+    return this.post<Array<{ subaccount_id: number; name: string; created_at: number }>>(
+      '/account/subaccount/list',
+      'list_subaccounts',
+      { account }
+    );
   }
 
   async createSubaccount(request: CreateSubaccountRequest): Promise<{ success: boolean }> {
@@ -551,7 +555,13 @@ export class ApiClient {
     return responseData.data;
   }
 
-  async subaccountFundTransfer(request: SubaccountFundTransferRequest): Promise<{ success: boolean; error: string | null }> {
-    return this.post<{ success: boolean; error: string | null }>('/account/subaccount/transfer', 'subaccount_transfer', request);
+  async subaccountFundTransfer(
+    request: SubaccountFundTransferRequest
+  ): Promise<{ success: boolean; error: string | null }> {
+    return this.post<{ success: boolean; error: string | null }>(
+      '/account/subaccount/transfer',
+      'subaccount_transfer',
+      request
+    );
   }
 }

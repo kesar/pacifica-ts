@@ -185,10 +185,12 @@ export type WebSocketEventMap = {
   account_info: (data: AccountInfo) => void;
   account_positions: (data: Position[]) => void;
   account_orders: (data: Order[]) => void;
-  account_order_updates: (data: Array<{
-    order: Order;
-    update_type: 'created' | 'filled' | 'partially_filled' | 'cancelled' | 'expired';
-  }>) => void;
+  account_order_updates: (
+    data: Array<{
+      order: Order;
+      update_type: 'created' | 'filled' | 'partially_filled' | 'cancelled' | 'expired';
+    }>
+  ) => void;
   account_trades: (data: Trade[]) => void;
   ws_error: (data: { code: number; message: string }) => void;
 };
