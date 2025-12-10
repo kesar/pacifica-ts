@@ -22,6 +22,9 @@
 				"useConst": "error",
 				"useTemplate": "warn"
 			},
+			"complexity": {
+				"useLiteralKeys": "off"
+			},
 			"suspicious": {
 				"noDoubleEquals": "error",
 				"noEmptyBlockStatements": "warn",

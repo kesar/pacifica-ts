@@ -263,16 +263,16 @@ export class ApiClient {
    */
   private transformCandle(data: Record<string, unknown>): Candle {
     return {
-      timestamp: data.t as number,
-      end_time: data.T as number,
-      symbol: data.s as string,
-      interval: data.i as string,
-      open: data.o as string,
-      close: data.c as string,
-      high: data.h as string,
-      low: data.l as string,
-      volume: data.v as string,
-      number_of_trades: data.n as number,
+      timestamp: data['t'] as number,
+      end_time: data['T'] as number,
+      symbol: data['s'] as string,
+      interval: data['i'] as string,
+      open: data['o'] as string,
+      close: data['c'] as string,
+      high: data['h'] as string,
+      low: data['l'] as string,
+      volume: data['v'] as string,
+      number_of_trades: data['n'] as number,
     };
   }
 

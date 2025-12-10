@@ -520,16 +520,16 @@ export class WebSocketClient extends EventEmitter<WebSocketEventMap> {
    */
   private transformCandle(data: Record<string, unknown>): import('../types/common.js').Candle {
     return {
-      timestamp: data.t as number,
-      end_time: data.T as number,
-      symbol: data.s as string,
-      interval: data.i as string,
-      open: data.o as string,
-      close: data.c as string,
-      high: data.h as string,
-      low: data.l as string,
-      volume: data.v as string,
-      number_of_trades: data.n as number,
+      timestamp: data['t'] as number,
+      end_time: data['T'] as number,
+      symbol: data['s'] as string,
+      interval: data['i'] as string,
+      open: data['o'] as string,
+      close: data['c'] as string,
+      high: data['h'] as string,
+      low: data['l'] as string,
+      volume: data['v'] as string,
+      number_of_trades: data['n'] as number,
     };
   }
 
@@ -538,18 +538,18 @@ export class WebSocketClient extends EventEmitter<WebSocketEventMap> {
    */
   private transformAccountInfo(data: Record<string, unknown>): import('../types/common.js').AccountInfo {
     return {
-      balance: data.b as string,
-      fee_level: data.f as number,
-      account_equity: data.ae as string,
-      available_to_spend: data.as as string,
-      available_to_withdraw: data.aw as string,
-      pending_balance: data.pb as string,
-      total_margin_used: data.mu as string,
-      cross_mmr: data.cm as string,
-      positions_count: data.pc as number,
-      orders_count: data.oc as number,
-      stop_orders_count: data.sc as number,
-      updated_at: data.t as number,
+      balance: data['b'] as string,
+      fee_level: data['f'] as number,
+      account_equity: data['ae'] as string,
+      available_to_spend: data['as'] as string,
+      available_to_withdraw: data['aw'] as string,
+      pending_balance: data['pb'] as string,
+      total_margin_used: data['mu'] as string,
+      cross_mmr: data['cm'] as string,
+      positions_count: data['pc'] as number,
+      orders_count: data['oc'] as number,
+      stop_orders_count: data['sc'] as number,
+      updated_at: data['t'] as number,
       use_ltp_for_stop_orders: false, // Not provided in WebSocket response
     };
   }
@@ -560,17 +560,17 @@ export class WebSocketClient extends EventEmitter<WebSocketEventMap> {
   private transformPositions(data: unknown[]): import('../types/common.js').Position[] {
     return (data as Array<Record<string, unknown>>).map((pos) => {
       const position: import('../types/common.js').Position = {
-        symbol: pos.s as string,
-        side: pos.d as 'bid' | 'ask',
-        amount: pos.a as string,
-        entry_price: pos.p as string,
-        funding: pos.f as string,
-        isolated: pos.i as boolean,
-        created_at: pos.t as number,
-        updated_at: pos.t as number,
+        symbol: pos['s'] as string,
+        side: pos['d'] as 'bid' | 'ask',
+        amount: pos['a'] as string,
+        entry_price: pos['p'] as string,
+        funding: pos['f'] as string,
+        isolated: pos['i'] as boolean,
+        created_at: pos['t'] as number,
+        updated_at: pos['t'] as number,
       };
-      if (pos.m !== undefined && pos.m !== null) {
-        position.margin = pos.m as string;
+      if (pos['m'] !== undefined && pos['m'] !== null) {
+        position.margin = pos['m'] as string;
       }
       return position;
     });
@@ -582,22 +582,22 @@ export class WebSocketClient extends EventEmitter<WebSocketEventMap> {
   private transformOrders(data: unknown[]): import('../types/common.js').Order[] {
     return (data as Array<Record<string, unknown>>).map((order) => {
       const transformedOrder: import('../types/common.js').Order = {
-        order_id: order.i as number,
-        symbol: order.s as string,
-        side: order.d as 'bid' | 'ask',
-        price: (order.p || order.ip) as string,
-        initial_amount: order.a as string,
-        filled_amount: order.f as string,
-        cancelled_amount: order.c as string,
-        stop_price: order.sp !== undefined && order.sp !== null ? (order.sp as string) : null,
-        order_type: order.ot as string,
+        order_id: order['i'] as number,
+        symbol: order['s'] as string,
+        side: order['d'] as 'bid' | 'ask',
+        price: (order['p'] || order['ip']) as string,
+        initial_amount: order['a'] as string,
+        filled_amount: order['f'] as string,
+        cancelled_amount: order['c'] as string,
+        stop_price: order['sp'] !== undefined && order['sp'] !== null ? (order['sp'] as string) : null,
+        order_type: order['ot'] as string,
         stop_parent_order_id: null,
-        reduce_only: order.ro as boolean,
-        created_at: order.t as number,
-        updated_at: order.t as number,
+        reduce_only: order['ro'] as boolean,
+        created_at: order['t'] as number,
+        updated_at: order['t'] as number,
       };
-      if (order.I !== undefined && order.I !== null) {
-        transformedOrder.client_order_id = order.I as string;
+      if (order['I'] !== undefined && order['I'] !== null) {
+        transformedOrder.client_order_id = order['I'] as string;
       }
       return transformedOrder;
     });
@@ -609,21 +609,21 @@ export class WebSocketClient extends EventEmitter<WebSocketEventMap> {
   private transformTrades(data: unknown[]): import('../types/common.js').Trade[] {
     return (data as Array<Record<string, unknown>>).map((trade) => {
       const transformedTrade: import('../types/common.js').Trade = {
-        history_id: trade.h as number,
-        order_id: trade.i as number,
-        symbol: trade.s as string,
-        amount: trade.a as string,
-        price: trade.p as string,
-        entry_price: trade.o as string,
-        fee: trade.f as string,
-        pnl: trade.n as string,
-        event_type: trade.te as string,
-        side: trade.ts as string,
-        created_at: trade.t as number,
-        cause: trade.tc as string,
+        history_id: trade['h'] as number,
+        order_id: trade['i'] as number,
+        symbol: trade['s'] as string,
+        amount: trade['a'] as string,
+        price: trade['p'] as string,
+        entry_price: trade['o'] as string,
+        fee: trade['f'] as string,
+        pnl: trade['n'] as string,
+        event_type: trade['te'] as string,
+        side: trade['ts'] as string,
+        created_at: trade['t'] as number,
+        cause: trade['tc'] as string,
       };
-      if (trade.I !== undefined && trade.I !== null) {
-        transformedTrade.client_order_id = trade.I as string;
+      if (trade['I'] !== undefined && trade['I'] !== null) {
+        transformedTrade.client_order_id = trade['I'] as string;
       }
       return transformedTrade;
     });
@@ -640,8 +640,8 @@ export class WebSocketClient extends EventEmitter<WebSocketEventMap> {
     return (data as Array<Record<string, unknown>>).map((orderData) => {
       const order = this.transformOrderUpdateOrder(orderData);
       // Map order event (oe) and status (os) to update_type
-      const orderEvent = orderData.oe as string;
-      const orderStatus = orderData.os as string;
+      const orderEvent = orderData['oe'] as string;
+      const orderStatus = orderData['os'] as string;
       let update_type: 'created' | 'filled' | 'partially_filled' | 'cancelled' | 'expired';
 
       if (orderStatus === 'filled') {
@@ -666,23 +666,23 @@ export class WebSocketClient extends EventEmitter<WebSocketEventMap> {
    */
   private transformOrderUpdateOrder(orderData: Record<string, unknown>): import('../types/common.js').Order {
     const order: import('../types/common.js').Order = {
-      order_id: orderData.i as number,
-      symbol: orderData.s as string,
-      side: orderData.d as 'bid' | 'ask',
-      price: (orderData.p || orderData.ip) as string,
-      initial_amount: orderData.a as string,
-      filled_amount: orderData.f as string,
+      order_id: orderData['i'] as number,
+      symbol: orderData['s'] as string,
+      side: orderData['d'] as 'bid' | 'ask',
+      price: (orderData['p'] || orderData['ip']) as string,
+      initial_amount: orderData['a'] as string,
+      filled_amount: orderData['f'] as string,
       cancelled_amount: '0',
-      stop_price: orderData.sp !== undefined && orderData.sp !== null ? (orderData.sp as string) : null,
-      order_type: orderData.ot as string,
+      stop_price: orderData['sp'] !== undefined && orderData['sp'] !== null ? (orderData['sp'] as string) : null,
+      order_type: orderData['ot'] as string,
       stop_parent_order_id:
-        orderData.si !== undefined && orderData.si !== null ? (Number(orderData.si) as number) : null,
-      reduce_only: orderData.r as boolean,
-      created_at: orderData.ct as number,
-      updated_at: orderData.ut as number,
+        orderData['si'] !== undefined && orderData['si'] !== null ? (Number(orderData['si']) as number) : null,
+      reduce_only: orderData['r'] as boolean,
+      created_at: orderData['ct'] as number,
+      updated_at: orderData['ut'] as number,
     };
-    if (orderData.I !== undefined && orderData.I !== null) {
-      order.client_order_id = orderData.I as string;
+    if (orderData['I'] !== undefined && orderData['I'] !== null) {
+      order.client_order_id = orderData['I'] as string;
     }
     return order;
   }
