@@ -84,8 +84,7 @@ describe('Functional Tests - Public Endpoints', () => {
       expect(typeof market.funding_rate).toBe('string');
     }, 10000);
 
-    it.skip('should fetch current prices', async () => {
-      // Note: This endpoint has rate limiting or connectivity issues in testnet
+    it('should fetch current prices', async () => {
       const prices = await client.getPrices();
 
       expect(prices).toBeDefined();

@@ -94,7 +94,27 @@ export class ApiClient {
 
     try {
       const response = await fetch(url, options);
-      const responseData = await response.json();
+
+      // Get response text first to check if it's empty
+      const responseText = await response.text();
+
+      if (!responseText || responseText.trim() === '') {
+        if (!response.ok) {
+          handleHttpError(response.status, 'Empty response from server');
+        }
+        throw new Error('Empty response from server');
+      }
+
+      // Try to parse JSON
+      let responseData: unknown;
+      try {
+        responseData = JSON.parse(responseText);
+      } catch (parseError) {
+        if (!response.ok) {
+          handleHttpError(response.status, `Invalid JSON response: ${responseText.slice(0, 100)}`);
+        }
+        throw new Error(`Invalid JSON response from server: ${responseText.slice(0, 100)}`);
+      }
 
       if (!response.ok) {
         if (isApiErrorResponse(responseData)) {
@@ -173,7 +193,7 @@ export class ApiClient {
    * ```
    */
   async getPrices(): Promise<PriceData[]> {
-    return this.get<PriceData[]>('/prices');
+    return this.get<PriceData[]>('/info/prices');
   }
 
   /**
@@ -192,7 +212,7 @@ export class ApiClient {
    * ```
    */
   async getOrderbook(params: GetOrderbookParams): Promise<Orderbook> {
-    return this.get<Orderbook>('/orderbook', {
+    return this.get<Orderbook>('/book', {
       symbol: params.symbol,
       ...(params.depth && { depth: params.depth }),
     });
@@ -260,7 +280,7 @@ export class ApiClient {
     symbol: string,
     limit?: number
   ): Promise<Array<{ funding_rate: string; timestamp: number }>> {
-    return this.get<Array<{ funding_rate: string; timestamp: number }>>('/funding-history', {
+    return this.get<Array<{ funding_rate: string; timestamp: number }>>('/funding_rate/history', {
       symbol,
       ...(limit && { limit }),
     });
@@ -319,7 +339,7 @@ export class ApiClient {
     symbol?: string,
     limit?: number
   ): Promise<Array<{ symbol: string; funding_payment: string; timestamp: number }>> {
-    return this.get<Array<{ symbol: string; funding_payment: string; timestamp: number }>>('/funding-payments', {
+    return this.get<Array<{ symbol: string; funding_payment: string; timestamp: number }>>('/funding/history', {
       account,
       ...(symbol && { symbol }),
       ...(limit && { limit }),
@@ -330,7 +350,7 @@ export class ApiClient {
     account: string,
     limit?: number
   ): Promise<Array<{ balance: string; timestamp: number }>> {
-    return this.get<Array<{ balance: string; timestamp: number }>>('/account/balance-history', {
+    return this.get<Array<{ balance: string; timestamp: number }>>('/account/balance/history', {
       account,
       ...(limit && { limit }),
     });
@@ -340,7 +360,7 @@ export class ApiClient {
     account: string,
     limit?: number
   ): Promise<Array<{ equity: string; timestamp: number }>> {
-    return this.get<Array<{ equity: string; timestamp: number }>>('/account/equity-history', {
+    return this.get<Array<{ equity: string; timestamp: number }>>('/portfolio', {
       account,
       ...(limit && { limit }),
     });
@@ -494,8 +514,8 @@ export class ApiClient {
     return this.post<{ success: boolean }>('/account/withdraw', 'withdraw', request);
   }
 
-  async listSubaccounts(): Promise<Array<{ subaccount_id: number; name: string; created_at: number }>> {
-    return this.get<Array<{ subaccount_id: number; name: string; created_at: number }>>('/subaccounts');
+  async listSubaccounts(account: string): Promise<Array<{ subaccount_id: number; name: string; created_at: number }>> {
+    return this.post<Array<{ subaccount_id: number; name: string; created_at: number }>>('/account/subaccount/list', 'list_subaccounts', { account });
   }
 
   async createSubaccount(request: CreateSubaccountRequest): Promise<{ success: boolean }> {
