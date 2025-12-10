@@ -1,6 +1,6 @@
 {
   "name": "pacifica.js",
-  "version": "3.1.0",
+  "version": "4.0.0",
   "description": "TypeScript SDK for Pacifica API and WebSocket integration",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
